@@ -107,6 +107,83 @@ public class LogonDBBean {
 		return menus;
 	}
 	
+	public List<MenuBean> selectMenuWithDays(String days) throws Exception {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<MenuBean> menus = new ArrayList<>();
+		
+		try {
+			conn = getConnection();
+			String sql = "SELECT * FROM menuTbl WHERE days = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setDate(1, Date.valueOf(days));
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				System.out.println("dd");
+				MenuBean menu = new MenuBean();
+				menu.setNo(rs.getInt("no"));
+				menu.setDays(rs.getDate("days"));
+				menu.setPart(rs.getString("part"));
+				menu.setMenu(rs.getString("menu"));
+				
+				menus.add(menu);
+			} // while
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(rs != null) { try { rs.close(); } catch(Exception e) {} }
+			if(pstmt != null) { try { pstmt.close(); } catch(Exception e) {} }
+			if(conn != null) { try { conn.close(); } catch(Exception e) {} }
+		} // finally
+		
+		System.out.println(menus.size());
+		return menus;
+	}
+	
+	public List<MenuBean> selectMenuWithDaysAndPart(String days, String part) throws Exception {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<MenuBean> menus = new ArrayList<>();
+		
+		try {
+			conn = getConnection();
+			//System.out.println(part);
+			String sql = "SELECT * FROM menuTbl WHERE days = ? AND part = ?";
+			//System.out.println(sql);
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setDate(1, Date.valueOf(days));
+			pstmt.setString(2, new String(part.getBytes("UTF-8"),"8859_1"));
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				System.out.println("dd");
+				MenuBean menu = new MenuBean();
+				menu.setNo(rs.getInt("no"));
+				menu.setDays(rs.getDate("days"));
+				menu.setPart(rs.getString("part"));
+				menu.setMenu(rs.getString("menu"));
+				
+				menus.add(menu);
+			} // if
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(rs != null) { try { rs.close(); } catch(Exception e) {} }
+			if(pstmt != null) { try { pstmt.close(); } catch(Exception e) {} }
+			if(conn != null) { try { conn.close(); } catch(Exception e) {} }
+		} // finally
+		
+		System.out.println(menus.size());
+		return menus;
+	}
+	
 	
 	public void insertMember(LogonDataBean member) throws Exception {
 		Connection conn = null;
@@ -149,14 +226,14 @@ public class LogonDBBean {
 			if(rs.next()) {
 				dbpass = rs.getString("passwd");
 				if(dbpass.equals(passwd)) {
-					x = 1; // 해당 아이디가 존재함
+					x = 1;
 				}
 				else {
-					x = 0; // 비밀번호가 틀림
+					x = 0; 
 				}
 			}
 			else {
-				x = -1; // 해당 아이디가 존재하지 않음
+				x = -1; 
 			}
 			
 		}
