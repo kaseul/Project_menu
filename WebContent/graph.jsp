@@ -1,46 +1,77 @@
-<%@page import="mirim.hs.kr.LikesBean"%>
-<%@page import="mirim.hs.kr.LogonDBBean"%>
 <%@page import="mirim.hs.kr.MenuBean"%>
+<%@page import="mirim.hs.kr.LikesBean"%>
 <%@page import="java.util.List"%>
+<%@page import="mirim.hs.kr.LogonDBBean"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
 	LogonDBBean db = LogonDBBean.getInstance();
-	List<MenuBean> menus = db.selectAllMenu();
-	List<LikesBean> likes = null;
+	List<MenuBean> menus = db.selectPopularMenus();
 	
-	String id = (String)session.getAttribute("id");
-	if(id != null) {
-		likes = db.selectLikes(id);
-	}
 	request.setAttribute("menus", menus); //JSP 데이터 전달
-	request.setAttribute("likes", likes); //JSP 데이터 전달
 %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>9월 급식</title>
+<title>Insert title here</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<!-- Google Chart -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <link href='fullcalendar/core/main.css' rel='stylesheet' />
 <link href='fullcalendar/daygrid/main.css' rel='stylesheet' />
 <script src='fullcalendar/core/main.js'></script>
 <script src='fullcalendar/daygrid/main.js'></script>
 <script src='fullcalendar/core/locales/ko.js'></script>
 <style>
-	html, body {
-		width: 100%;
-		height: 100%;
-		margin: 0 auto;
+	#chart {
+		min-height: 500px;
 	}
 </style>
 <script>
+	var data;
+	var options;
+	// google.charts.load('current', {'packages':['line']});
+	google.charts.load('current', {packages: ['corechart', 'line']});
+	google.charts.setOnLoadCallback(drawChart);
+
+	function drawChart() {
+	    data = new google.visualization.DataTable();
+	    data.addColumn('string', '일');
+	    data.addColumn('number', '좋아하는 학생 수');
+	    
+	    data.addRows([
+	    	<c:forEach var="menu" items="${menus}">
+	    		['<f:formatDate value="${menu.days}" pattern="M월 dd일"></f:formatDate> ' + '${menu.part}', ${menu.likes}],
+	    	</c:forEach>
+	    ]);
+	
+	
+	    options = {
+	      title: '학생들이 좋아하는 급식',
+	      legend: { position: 'bottom' }
+	    };
+	
+	// var chart = new google.charts.Line(document.getElementById('chart'));
+	// chart.draw(data, google.charts.Line.convertOptions(options)); 
+	
+	    var chart = new google.visualization.LineChart(document.getElementById('chart'));
+		chart.draw(data, options);
+	}
+
+	function resize() {
+		var chart = new google.visualization.LineChart(document.getElementById('chart'));
+	  	chart.draw(data, options);
+	}
+	
+	window.onresize = resize;
+
 document.addEventListener('DOMContentLoaded', function() {
   var calendarEl = document.getElementById('calendar');
 
@@ -49,6 +80,17 @@ document.addEventListener('DOMContentLoaded', function() {
     eventClick: function(info) {
       var eventObj = info.event;
 
+      if (eventObj.url) {
+        alert(
+          'Clicked ' + eventObj.title + '.\n' +
+          'Will open ' + eventObj.url + ' in a new tab'
+        );
+
+        //window.open(eventObj.url);
+
+        // info.jsEvent.preventDefault(); // prevents browser from following link in current tab.
+      }
+      else {
         // alert('Clicked ' + eventObj.title + " " + eventObj.extendedProps.menu);
         var days = eventObj.start;
         var menu = eventObj.extendedProps.menu;
@@ -56,50 +98,17 @@ document.addEventListener('DOMContentLoaded', function() {
         menu = menu.replace(/,/g, '<br>');
         
         document.getElementById("modal_heading").innerHTML = days + " " + eventObj.title;
-        <c:choose>
-        	<c:when test="${empty id}">
-        		document.getElementById("modal_content").innerHTML = menu;
-        	</c:when>
-        	<c:when test="${id == 'admin'}">
-        		document.getElementById("modal_content").innerHTML = menu + '<p> <center><button id="likes" type="button" style="margin: 0 auto;" class="btn btn-dark">'+ "★" + eventObj.extendedProps.likes +'</button></center>';
-        	</c:when>
-        	<c:otherwise>
-        		if(eventObj.extendedProps.liked) {
-        			document.getElementById("modal_content").innerHTML = menu + '<p> <center><button id="likes" type="button" style="margin: 0 auto;" class="btn btn-primary" onclick="likesToggle(' + eventObj.extendedProps.no + ', '+ -1 +')">'+ "★" + eventObj.extendedProps.likes +'</button></center>';
-        		}
-        		else {
-        			document.getElementById("modal_content").innerHTML = menu + '<p> <center><button id="likes" type="button" style="margin: 0 auto;" class="btn btn-light" onclick="likesToggle(' + eventObj.extendedProps.no + ', '+ 1 + ')">'+ "★" + eventObj.extendedProps.likes +'</button></center>';
-        		}
-        		document.getElementById("modal_content").innerHTML += '<br><form action="registerBoard.jsp" method="post">' + 
-        																'<p>급식에 대한 의견을 입력해주세요!</p>' + 
-														        		'<textarea name="content" style="resize: none; width: 100%;" required></textarea>' +
-														        		'<input type="hidden" name="id" value="${id}">' +
-														        		'<input type="hidden" name="no" value="' + eventObj.extendedProps.no + '">' +
-														        		'<center><button class="btn btn-dark">입력</button></center>' +
-														        	'</form>';
-        	</c:otherwise>
-        </c:choose>
+     	document.getElementById("modal_content").innerHTML = menu + '<p> <center><button id="likes" type="button" style="margin: 0 auto;" class="btn btn-dark">'+ "★" + eventObj.extendedProps.likes +'</button></center>';
         
         // document.getElementById("likes").innerHTML = "★" + eventObj.extendedProps.likes;
         document.getElementById("btn_modal").click();
+      }
     },
     locale: 'ko',
     defaultDate: '2019-09-15',
     events: [
     	<c:forEach items="${menus}" var="menu">
 			{
-				<c:choose>
-					<c:when test="{empty id}">
-					
-					</c:when>
-					<c:otherwise>
-						<c:forEach items="${likes}" var="like">
-							<c:if test="${menu.no == like.no}">
-								liked: 'true',
-							</c:if>
-						</c:forEach>
-					</c:otherwise>
-				</c:choose>				
 				title: '${menu.part}',
 				menu: '${menu.menu}',
 				no: ${menu.no},
@@ -127,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function likesToggle(no, amount) {
 	//alert(no + " " + amount);
 	
-	location.href="likesProc.jsp?no=" + no + "&amount=" + amount;
+	location.href="likesProc.jsp?no=" + no + "&amount=" + amount + "&url=likes";
 }
 </script>
 </head>
@@ -173,48 +182,36 @@ function likesToggle(no, amount) {
 	  	</c:choose>
 	  </ul>
 	</nav>
-	
-	<form class="form-inline" action="searchProc.jsp" method="post">
-		<input type="date" class="form-control col-6" name="days" min="2019-09-01" max="2019-09-30" required>
-		<select class="form-control col-5" name="part" required>
-			<option value="all">모두</option>
-			<option value="조식">조식</option>
-			<option value="중식">중식</option>
-			<option value="석식">석식</option>
-		</select>
-		<button class="btn btn-dark col-1">검색</button>
-	</form>
-	<p>
 	<div class="container">
+		<div id="chart"></div>
 		<div id="calendar"></div>
 	</div>
-	
 	<!-- Button to Open the Modal -->
-  <input type="hidden" id="btn_modal" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-
-  <!-- The Modal -->
-  <div class="modal fade" id="myModal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-      
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <h4 id="modal_heading" class="modal-title">Modal Heading</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-        
-        <!-- Modal body -->
-        <div class="modal-body">
-        	<div id="modal_content"></div>
-        </div>
-        
-        <!-- Modal footer -->
-        <!-- <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-        </div> -->
-        
-      </div>
-    </div>
-  </div>
+	  <input type="hidden" id="btn_modal" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+	
+	  <!-- The Modal -->
+	  <div class="modal fade" id="myModal">
+	    <div class="modal-dialog">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	          <h4 id="modal_heading" class="modal-title">Modal Heading</h4>
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	        </div>
+	        
+	        <!-- Modal body -->
+	        <div class="modal-body">
+	        	<div id="modal_content"></div>
+	        </div>
+	        
+	        <!-- Modal footer -->
+	        <!-- <div class="modal-footer">
+	          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+	        </div> -->
+	        
+	      </div>
+	    </div>
+	  </div>
 </body>
 </html>

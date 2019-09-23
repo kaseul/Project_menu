@@ -474,6 +474,7 @@ tr:first-child > td > .fc-day-grid-event {
   /* force events to be one-line tall */
   white-space: nowrap;
   overflow: hidden;
+  color: white;
 }
 
 .fc-day-grid-event .fc-time {

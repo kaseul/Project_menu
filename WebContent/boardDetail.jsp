@@ -1,40 +1,40 @@
 <%@page import="java.util.Date"%>
-<%@page import="mirim.hs.kr.LogonDBBean"%>
 <%@page import="mirim.hs.kr.MenuBean"%>
+<%@page import="mirim.hs.kr.BoardBean"%>
 <%@page import="java.util.List"%>
+<%@page import="mirim.hs.kr.LogonDBBean"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
-	request.setCharacterEncoding("UTF-8");
-	List<MenuBean> menus = null;
-	LogonDBBean db = LogonDBBean.getInstance();
 	String days = request.getParameter("days");
-	String part = request.getParameter("part");
-	// out.println(days + " " + part);
-	menus = db.selectMenuWithDays(days);
-	/* if(part.equals("all")) {
-		menus = db.selectMenuWithDays(days);
-	}
-	else {
-		menus = db.selectMenuWithDaysAndPart(days, part);
-	} */
-	request.setAttribute("menus", menus); //JSP 데이터 전달
+	int no = Integer.parseInt(request.getParameter("no"));
+	LogonDBBean db = LogonDBBean.getInstance();
+	List<BoardBean> boards = db.selectBoards(no);
+	MenuBean menu = db.selectMenu(no);
+	
 	request.setAttribute("days", days);
-	request.setAttribute("part", part); //JSP 데이터 전달
-	// out.println(menus.size());
+	request.setAttribute("boards", boards);
+	request.setAttribute("menu", menu);
 %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>9월 급식</title>
+<title>Insert title here</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<link href='fullcalendar/core/main.css' rel='stylesheet' />
+<link href='fullcalendar/daygrid/main.css' rel='stylesheet' />
+<script src='fullcalendar/core/main.js'></script>
+<script src='fullcalendar/daygrid/main.js'></script>
+<script src='fullcalendar/core/locales/ko.js'></script>
+<script>
+</script>
 </head>
 <body>
 	<div class="jumbotron jumbotron-fluid">
@@ -78,45 +78,25 @@
 	  	</c:choose>
 	  </ul>
 	</nav>
-	<table class="table table-striped">
-		<tr>
-			<th>날짜</th>
-			<th>조식/중식/석식</th>
-			<th>메뉴</th>
-		</tr>
-		<c:choose>
-			<c:when test="${empty menus}">
-				<tr>
-					<td colspan="3">오늘 급식이 없습니다.</td>
-				</tr>
-			</c:when>
-			<c:otherwise>
-				<c:set var="i" value="0"></c:set>
-				<c:forEach items="${menus}" var="menu">
-					<c:if test="${part == 'all' || menu.part == part}">
-						<c:set var="i" value="1"></c:set>
-						<tr>
-							<%-- <td>${menu.no}</td> --%>
-							<td><f:formatDate value="${menu.days}" pattern="yyyy-MM-dd (E)"/></td>
-							<td>${menu.part}</td>
-							<td>
-								<c:forTokens items="${menu.menu}" delims="," var="food">
-									${food}<br>
-								</c:forTokens>
-							</td>
-						</tr>
-					</c:if>
-				</c:forEach>
-				<c:if test="${i == 0}">
-					<tr>
-						<td colspan="3">오늘 ${part}이 없습니다.</td>
-					</tr>
-				</c:if>
-			</c:otherwise>
-		</c:choose>
-	</table>
-	<div style="margin-top: 50px; width: 100%; text-align: center;">
-		<button class="btn btn-dark" style="left: 50%; transform: translate(-50%)" onclick="history.go(-1)">뒤로가기</button>
+	<div class="container">
+		<div class="card">
+			<div class="card-header">
+				${days}의 급식 의견
+			</div>
+			<div class="card-body">
+				<c:forTokens items="${menu.menu}" delims="," var="food">
+					${food}<br>
+				</c:forTokens>
+			</div>
+		</div>
+		<c:forEach items="${boards}" var="board">
+			<hr>
+			<span style="font-weight: bold">${board.id}</span><br>
+			${board.content}
+		</c:forEach>
 	</div>
+	<center>
+		<button class="btn btn-dark" onclick="history.go(-1)">뒤로가기</button>
+	</center>
 </body>
 </html>

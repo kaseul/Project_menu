@@ -8,6 +8,7 @@ public class MenuBean {
 	private Date days;
 	private String part;
 	private String menu;
+	private int likes;
 	
 	public int getNo() {
 		return no;
@@ -33,10 +34,16 @@ public class MenuBean {
 	public void setMenu(String menu) {
 		this.menu = menu;
 	}
+	public int getLikes() {
+		return likes;
+	}
+	public void setLikes(int likes) {
+		this.likes = likes;
+	}
 	
 	@Override
 	public String toString() {
-		return "MenuBean [no=" + no + ", days=" + days + ", part=" + part + ", menu=" + menu + "]";
+		return "MenuBean [no=" + no + ", days=" + days + ", part=" + part + ", menu=" + menu + ", likes=" + likes + "]";
 	}
 	
 }
