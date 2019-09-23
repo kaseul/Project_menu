@@ -164,12 +164,16 @@ function likesToggle(no, amount) {
 			      <a class="nav-link" href="logout.jsp">로그아웃</a>
 			    </li>
 			    <li class="nav-item">
+			      <a class="nav-link" href="searchMenuProc.jsp">메뉴검색</a>
+			    </li>
+			    <li class="nav-item">
 			      <a class="nav-link" href="likes.jsp">즐겨찾기</a>
 			    </li>
 	  		</c:otherwise>
 	  	</c:choose>
 	  </ul>
 	</nav>
+	
 	<div class="container">
 		<div id="calendar"></div>
 	</div>

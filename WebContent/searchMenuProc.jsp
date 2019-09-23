@@ -1,3 +1,4 @@
+<%@page import="java.util.ArrayList"%>
 <%@page import="mirim.hs.kr.MenuBean"%>
 <%@page import="mirim.hs.kr.LikesBean"%>
 <%@page import="java.util.List"%>
@@ -6,16 +7,29 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%	
+	request.setCharacterEncoding("UTF-8");
+	String keyword = request.getParameter("keyword");
 	LogonDBBean db = LogonDBBean.getInstance();
 	List<MenuBean> menus = db.selectAllMenu();
+	List<MenuBean> menusSearched = new ArrayList<>();
+	for(MenuBean menu : menus) {
+		String food = menu.getMenu();
+		if(keyword != null && food.contains(keyword)) {
+			menusSearched.add(menu);
+			// System.out.println("aa");
+		}
+	}
 	List<LikesBean> likes = null;
 	String id = (String)session.getAttribute("id");
 	if(id != null) {
 		likes = db.selectLikes(id);
 	}
-	request.setAttribute("menus", menus); //JSP 데이터 전달
+	request.setAttribute("keyword", keyword);
+	request.setAttribute("menus", menusSearched); //JSP 데이터 전달
 	request.setAttribute("likes", likes);
+	//out.println(keyword);
 %>
 <!DOCTYPE html>
 <html>
@@ -81,29 +95,30 @@ document.addEventListener('DOMContentLoaded', function() {
     defaultDate: '2019-09-15',
     events: [
     	<c:forEach items="${menus}" var="menu">
-			<c:forEach items="${likes}" var="like">
-				<c:if test="${menu.no == like.no}">
-				{
-					liked: 'true',
-					title: '${menu.part}',
-					menu: '${menu.menu}',
-					no: ${menu.no},
-					likes: ${menu.likes},
-					start: '${menu.days}' + 
-					<c:choose>
-						<c:when test="${menu.part == '조식'}">
-							'T07:00:00'
-						</c:when>
-						<c:when test="${menu.part == '중식'}">
-							'T12:00:00'
-						</c:when>
-						<c:when test="${menu.part == '석식'}">
-							'T17:00:00'
-						</c:when>
-					</c:choose>
-				},
-				</c:if>
-			</c:forEach>
+    		{
+    			title: '${menu.part}',
+				menu: '${menu.menu}',
+				no: ${menu.no},
+				likes: ${menu.likes},
+				start: '${menu.days}' + 
+				<c:choose>
+					<c:when test="${menu.part == '조식'}">
+						'T07:00:00'
+					</c:when>
+					<c:when test="${menu.part == '중식'}">
+						'T12:00:00'
+					</c:when>
+					<c:when test="${menu.part == '석식'}">
+						'T17:00:00'
+					</c:when>
+				</c:choose>
+				<c:forEach items="${likes}" var="like">
+					<c:if test="${menu.no == like.no}">
+					
+						liked: 'true',
+					</c:if>
+				</c:forEach>
+    		},
 		</c:forEach>
     ]
   });
@@ -154,13 +169,25 @@ function likesToggle(no, amount) {
 			      <a class="nav-link" href="logout.jsp">로그아웃</a>
 			    </li>
 			    <li class="nav-item">
+			      <a class="nav-link" href="searchMenuProc.jsp">메뉴검색</a>
+			    </li>
+			    <li class="nav-item">
 			      <a class="nav-link" href="likes.jsp">즐겨찾기</a>
 			    </li>
 	  		</c:otherwise>
 	  	</c:choose>
 	  </ul>
 	</nav>
+	
 	<div class="container">
+		<form class="form-inline" action="searchMenuProc.jsp" method="post">
+			<input type="text" class="form-control" name="keyword" required>
+			<button class="btn btn-dark col-1">검색</button>
+		</form>
+		<p>
+		<c:if test="${!empty keyword}">
+			<p>'${keyword}'의 검색 결과 입니다</p>
+		</c:if>
 		<div id="calendar"></div>
 	</div>
 	<!-- Button to Open the Modal -->
