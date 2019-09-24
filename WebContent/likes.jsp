@@ -152,6 +152,9 @@ function likesToggle(no, amount) {
 	  			<li class="nav-item">
 			      <a class="nav-link" href="logout.jsp">로그아웃</a>
 			    </li>
+			    <li class="nav-item">
+			      <a class="nav-link" href="insertMenu.jsp">급식 등록</a>
+			    </li>
 	  			<li class="nav-item">
 			      <a class="nav-link" href="graph.jsp">메뉴 통계</a>
 			    </li>

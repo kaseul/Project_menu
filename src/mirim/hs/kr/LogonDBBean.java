@@ -33,9 +33,10 @@ public class LogonDBBean {
 		
 		try {
 			conn = getConnection();
+			Date date = new Date(menu.getDays().getTime());
 			String sql = "INSERT INTO menuTbl(days, part, menu) VALUES(?, ?, ?)";
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setDate(1, (Date) menu.getDays());
+			pstmt.setDate(1, date);
 			pstmt.setString(2, menu.getPart());
 			pstmt.setString(3, menu.getMenu());
 			pstmt.executeUpdate();
@@ -57,6 +58,7 @@ public class LogonDBBean {
 		try {
 			conn = getConnection();
 			String sql = "UPDATE menuTbl SET menu = ? WHERE no = ?";
+			System.out.println(menu.getMenu());
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, menu.getMenu());
 			pstmt.setInt(2, menu.getNo());
@@ -241,11 +243,11 @@ public class LogonDBBean {
 		return menus;
 	}
 	
-	public List<MenuBean> selectMenuWithDaysAndPart(String days, String part) throws Exception {
+	public MenuBean selectMenuWithDaysAndPart(String days, String part) throws Exception {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		List<MenuBean> menus = new ArrayList<>();
+		MenuBean menus = null;
 		
 		try {
 			conn = getConnection();
@@ -254,7 +256,7 @@ public class LogonDBBean {
 			//System.out.println(sql);
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setDate(1, Date.valueOf(days));
-			pstmt.setString(2, new String(part.getBytes("UTF-8"),"8859_1"));
+			pstmt.setString(2, part);
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()) {
@@ -266,7 +268,7 @@ public class LogonDBBean {
 				menu.setMenu(rs.getString("menu"));
 				menu.setLikes(rs.getInt("likes"));
 				
-				menus.add(menu);
+				menus = menu;
 			} // if
 		}
 		catch(Exception e) {
@@ -278,7 +280,7 @@ public class LogonDBBean {
 			if(conn != null) { try { conn.close(); } catch(Exception e) {} }
 		} // finally
 		
-		System.out.println(menus.size());
+		
 		return menus;
 	}
 	

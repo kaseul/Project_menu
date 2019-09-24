@@ -31,6 +31,9 @@
 	  			<li class="nav-item">
 			      <a class="nav-link" href="logout.jsp">로그아웃</a>
 			    </li>
+			    <li class="nav-item">
+			      <a class="nav-link" href="insertMenu.jsp">급식 등록</a>
+			    </li>
 	  			<li class="nav-item">
 			      <a class="nav-link" href="graph.jsp">메뉴 통계</a>
 			    </li>
@@ -56,7 +59,7 @@
 	<div class="container" style="margin-top: 10%;">
 		<form action="loginProc.jsp" method="post">
 		  <div class="form-group">
-		    <label for="id">ID:</label>
+		    <label for="id">학번:</label>
 		    <input type="text" class="form-control" id="id" name="id" required>
 		  </div>
 		  <div class="form-group">

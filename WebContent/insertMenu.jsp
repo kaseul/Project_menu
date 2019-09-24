@@ -1,7 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="f" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,22 +53,25 @@
 	  	</c:choose>
 	  </ul>
 	</nav>
-	
 	<div class="container" style="margin-top: 10%;">
-		<form action="joinProc.jsp" method="post">
+		<form action="insertMenuProc.jsp" method="post">
+		<div class="form-group">
+		    <label for="days">날짜:</label>
+		    <input type="date" class="form-control" id="days" name="days" min="2019-09-01" max="2019-09-30" required>
+	    </div>
+	    <div class="form-inline">
+		    <label for="days">파트:</label>
+		    <select class="form-control col-12" name="part" required>
+				<option value="조식">조식</option>
+				<option value="중식">중식</option>
+				<option value="석식">석식</option>
+			</select>
+	    </div>
 		  <div class="form-group">
-		    <label for="id">학번:</label>
-		    <input type="text" class="form-control" id="id" name="id" required>
+		    <label for="menu">메뉴:</label>
+		    <textarea name="menu" style="resize: none; width: 100%;" placeholder=",로 메뉴를 구분해주세요" required></textarea>
 		  </div>
-		  <div class="form-group">
-		    <label for="pwd">비밀번호:</label>
-		    <input type="password" class="form-control" id="pwd" name="password" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="name">이름:</label>
-		    <input type="text" class="form-control" id="name" name="name" required>
-		  </div>
-		  <button type="submit" class="btn btn-dark">회원가입</button>
+		  <button type="submit" class="btn btn-dark">급식 등록</button>
 		</form>
 	</div>
 </body>
